@@ -8,10 +8,12 @@ import java.util.ArrayList;
 public class Transform {
 	
 	// Scaling function's coefficients.
-	public static ArrayList<Double> scalingCoefficients;
+	public static double[][] scalingCoefficients;
 	
 	// wavelet function's coefficients.
-	public static ArrayList<ArrayList<Double>> waveletCoefficients;
+	public static ArrayList<Double[][]> psiPsiCoefficients;
+	public static ArrayList<Double[][]> psiPhiCoefficients;
+	public static ArrayList<Double[][]> phiPsiCoefficients;
 	
 	// Scaling function's translates.
 	public static ArrayList<Double> scalingTranslates;

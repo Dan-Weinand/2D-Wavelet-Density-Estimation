@@ -12,7 +12,7 @@ import de.erichseifert.gral.data.DataTable;
 
 public class DensityHelper {
 	
-	private static double[] oldSamples;		// The old samples in the window
+	private static double[][] oldSamples;		// The old samples in the window
 	private static int N;					// How many samples have been read in
 	
 	/**
@@ -32,42 +32,49 @@ public class DensityHelper {
 	 * 
 	 * @param Xnew : the new data point to update the coefficients based on
 	 */
-	public static void updateCoefficients(double Xnew){
+	public static void updateCoefficients(double[] Xnew){
 		
 		if (Settings.waveletFlag) {
-			updateWaveletCoefficients(Xnew);
+		//	updateWaveletCoefficients(Xnew);
 		}
 		
 		// The normalizing constant for the scaling basis functions
 		double scaleNormalizer = Math.pow(2, Settings.startLevel/2.0);
+		double ageNorm = 1;
 		if (Settings.agingFlag == Settings.windowAge) {
-			scaleNormalizer /= Settings.windowSize;
+			ageNorm /= Settings.windowSize;
 		}
 		else if (Settings.agingFlag == Settings.caudleAge) {
-			scaleNormalizer *= (1 - Settings.agingTheta);
+			ageNorm *= (1 - Settings.agingTheta);
 		}
 		else if (Settings.agingFlag == Settings.noAge) {
-			scaleNormalizer /= (N+1)*1.0;
+			ageNorm /= (N+1)*1.0;
 		}
 		
-		// Scale coefficients if Caudle aging is being used
+/*		// Scale coefficients if Caudle aging is being used
 		if (Settings.agingFlag == Settings.caudleAge) {
-			for (int scalIndex = 0; 
-					scalIndex < Transform.scalingCoefficients.size();
-					scalIndex++) {
-				double newCoef = Settings.agingTheta*Transform.scalingCoefficients.get(scalIndex);
-				Transform.scalingCoefficients.set(scalIndex,  newCoef);
+			for (int x1Index = 0; 
+					x1Index < Transform.scalingCoefficients.length;
+					x1Index++) {
+				for (int x2Index = 0; 
+						x2Index < Transform.scalingCoefficients.length;
+						x2Index++) {
+					Transform.scalingCoefficients[x1Index][x2Index] *= Settings.agingTheta;
+				}
 			}
 				
-		}
+		}*/
 		
 		// Recursively compute coefficients if no aging is used
 		else if (Settings.agingFlag == Settings.noAge){
-			for (int scalIndex = 0; 
-					scalIndex < Transform.scalingCoefficients.size();
-					scalIndex++) {
-				double newCoef = (N)/(N+1.0)*Transform.scalingCoefficients.get(scalIndex);
-				Transform.scalingCoefficients.set(scalIndex,  newCoef);
+			for (int x1Index = 0; 
+					x1Index < Transform.scalingCoefficients.length;
+					x1Index++) {
+				for (int x2Index = 0; 
+						x2Index < Transform.scalingCoefficients.length;
+						x2Index++) {
+					Transform.scalingCoefficients[x1Index][x2Index] *= (N)/(N+1.0);
+				}
 			}
 		}
 		
@@ -76,46 +83,81 @@ public class DensityHelper {
 			
 			// Only remove a sample if there have been more than window size samples
 			if (N > Settings.windowSize){ 
-				double Xold = oldSamples[N % Settings.windowSize];
+				double[] Xold = oldSamples[N % Settings.windowSize];
+				double x1 = Xold[0];
+				double x2 = Xold[1];
 			
 			
-				//Loop through the translations for the scaling basis functions
-				int scaleInd = 0;
-				for (double k : Transform.scalingTranslates) {
+				//Loop through the x1 translations for the scaling basis functions
+				int x1Ind = 0;
+				for (double k1 : Transform.scalingTranslates) {
 				
 					// Get the translated & scaled data point
-					double xScaled = Math.pow(2, Settings.startLevel) * Xold - k;
+					double x1Scaled = Math.pow(2, Settings.startLevel) * x1 - k1;
 				
-					// If the wavelet supports the data point, update the coefficient
-					if (Wavelet.inSupport(xScaled)) {
-						double scaleNew = Transform.scalingCoefficients.get(scaleInd) 
-							          	- scaleNormalizer*Wavelet.getPhiAt(xScaled);
-						Transform.scalingCoefficients.set(scaleInd, scaleNew);
-					
-					}
-					scaleInd++;
-				}
+					// If the x1 wavelet supports the data point, check through x2 supports
+					if (Wavelet.inSupport(x1Scaled)) {
+						double phi1Here = scaleNormalizer*Wavelet.getPhiAt(x1Scaled);
+						int x2Ind = 0;
+						
+						//Loop through the x2 translations for the scaling basis functions
+						for (double k2 : Transform.scalingTranslates) {
+							
+							// Get the translated & scaled data point
+							double x2Scaled = Math.pow(2, Settings.startLevel) * x2 - k2;
+							
+							// Update appropriate coefficient iff in x2 support
+							if (Wavelet.inSupport(x2Scaled)) {
+								double phi2Here = scaleNormalizer*Wavelet.getPhiAt(x1Scaled);
+								double coeffSub = phi1Here*phi2Here/Settings.windowSize;
+								
+								Transform.scalingCoefficients[x1Ind][x2Ind] -= coeffSub;
+							} // end updating
+							x2Ind++;
+						} // end x2 looping										
+					} // end in x1 support
+					x1Ind++;
+				} // end x1 looping
 			}
 			
 			oldSamples[N % Settings.windowSize] = Xnew;
 		}
 		
-		//Loop through the translations for the scaling basis functions
-		int scaleInd = 0;
-		for (double k : Transform.scalingTranslates) {
-			
+		// The x1 and x2 coordinates of the incoming point
+		double x1 = Xnew[0];
+		double x2 = Xnew[1];
+	
+	
+		//Loop through the x1 translations for the scaling basis functions
+		int x1Ind = 0;
+		for (double k1 : Transform.scalingTranslates) {
+		
 			// Get the translated & scaled data point
-			double xScaled = Math.pow(2, Settings.startLevel) * Xnew - k;
-			
-			// If the wavelet supports the data point, update the coefficient
-			if (Wavelet.inSupport(xScaled)) {
-				double scaleNew = Transform.scalingCoefficients.get(scaleInd) 
-						          + scaleNormalizer*Wavelet.getPhiAt(xScaled);
-				Transform.scalingCoefficients.set(scaleInd, scaleNew);
+			double x1Scaled = Math.pow(2, Settings.startLevel) * x1 - k1;
+		
+			// If the x1 wavelet supports the data point, check through x2 supports
+			if (Wavelet.inSupport(x1Scaled)) {
+				double phi1Here = scaleNormalizer*Wavelet.getPhiAt(x1Scaled);
+				int x2Ind = 0;
 				
-			}
-			scaleInd++;
-		}
+				//Loop through the x2 translations for the scaling basis functions
+				for (double k2 : Transform.scalingTranslates) {
+					
+					// Get the translated & scaled data point
+					double x2Scaled = Math.pow(2, Settings.startLevel) * x2 - k2;
+					
+					// Update appropriate coefficient iff in x2 support
+					if (Wavelet.inSupport(x2Scaled)) {
+						double phi2Here = scaleNormalizer*Wavelet.getPhiAt(x1Scaled);
+						double coeffAdd = phi1Here*phi2Here*ageNorm;
+						
+						Transform.scalingCoefficients[x1Ind][x2Ind] += coeffAdd;
+					} // end updating
+					x2Ind++;
+				} // end x2 looping										
+			} // end in x1 support
+			x1Ind++;
+		} // end x1 looping
 		
 		N++;
 	} // end updateCoefficients
@@ -128,7 +170,7 @@ public class DensityHelper {
 	 * 
 	 * @param Xnew : the new data point to update the coefficients based on
 	 */
-	private static void updateWaveletCoefficients(double Xnew) {
+/*	private static void updateWaveletCoefficients(double[] Xnew) {
 		
 		// Short hand for start level
 		int j0 = Settings.startLevel;
@@ -217,7 +259,7 @@ public class DensityHelper {
 		
 		
 	} // end updateWaveletCoefficients
-
+*/
 	/**
 	 * Find the maximum and minimum translation indices which
 	 * support the incoming data point.
@@ -291,13 +333,13 @@ public class DensityHelper {
 		
 		// Create window to store old samples
 		if (Settings.agingFlag == Settings.windowAge) {
-			oldSamples = new double[Settings.windowSize];
+			oldSamples = new double[Settings.windowSize][2];
 		}
 		
 		// Set all scaling coefficients to 0
-		Transform.scalingCoefficients = new ArrayList<Double>(Collections.nCopies(Transform.scalingTranslates.size(), 0.0));
+		Transform.scalingCoefficients = new double[Transform.scalingTranslates.size()][Transform.scalingTranslates.size()];
 		
-		if (Settings.waveletFlag) {
+/*		if (Settings.waveletFlag) {
 			Transform.waveletCoefficients = new ArrayList<ArrayList<Double>> ();
 			
 			// Loop through resolutions
@@ -309,7 +351,7 @@ public class DensityHelper {
 															(j - Settings.startLevel).size(), 0.0));
 				Transform.waveletCoefficients.add(jCoefficients);
 			}
-		}
+		}*/
 	} //end initializeCoefficients
 	
 	/**
@@ -320,7 +362,7 @@ public class DensityHelper {
 	 *      are the proper size
 	 * @return the normalized density estimate
 	 */
-	private static ArrayList<Double> getDensity() {
+	private static double[][] getDensity() {
 		
 		ArrayList<Double> density = new ArrayList<Double> ();
 		double scaleNormalizer = Math.pow(2, Settings.startLevel/2.0);
@@ -362,7 +404,7 @@ public class DensityHelper {
 	 * @param density The density from the scaling basis functions
 	 * @return The complete unnormalized density
 	 */
-	private static ArrayList<Double> addWaveDensity(ArrayList<Double> density) {
+	private static double[][] addWaveDensity(ArrayList<Double> density) {
 		
 		// Short hand for start leve
 		int j0 = Settings.startLevel;
@@ -453,20 +495,13 @@ public class DensityHelper {
 	} //end normalizeDensity
 	
 	/**
-	 * Takes the old normalized density over the supported range and
-	 * updates it based on the current coefficients.
-	 * @param density : the data table containing the density information
+	 * Updates the plotted density based on current coefficients
 	 */
-	public static void updateDensity(DataTable densityTable) {
+	public static void updateDensity() {
 		
-		ArrayList<Double> normDensity = getDensity();
+		double[][] normDensity = getDensity();
 		
-		// Update each density in the range
-        for (int i = 0; i < normDensity.size(); i++) {
-            double Yi = normDensity.get(i);
-            densityTable.set(1, i, Yi);
-            
-        }
+		// UPDATE PLOT DENSITY
 
 	}
 	
