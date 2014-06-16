@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="WaveletFiles"/>
+	<classpathentry kind="src" path="Classes"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="lib" path="ExternalJars/gral-core-0.10.jar"/>
+	<classpathentry kind="lib" path="ExternalJars/VectorGraphics2D-0.9.1.jar"/>
+	<classpathentry kind="lib" path="ExternalJars/opencsv-2.3.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
