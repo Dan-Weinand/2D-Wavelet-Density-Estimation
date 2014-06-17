@@ -269,15 +269,14 @@ public class DensityHelper {
 	 * @return : An array containing the minimum and maximum
 	 *           translation indices which support the data point
 	 */
-	private static double[] findRelevantKIndices(double X, int j) {
-		//NOT YET VETTED, potentially could be used in future optimization
+	private static int[] findRelevantKIndices(double X, int j) {
 		
 		// Get the max & min values for the wavelet's support
 		double[] waveletMinMax = Wavelet.getSupport();
 		
-		double kMin = Math.ceil(Math.pow(2,j*X) - waveletMinMax[0]);
-		double kMax = Math.floor(Math.pow(2,j*X) - waveletMinMax[1]);
-		double[] kMinMax = new double[2];
+		int kMin = (int) Math.ceil(Math.pow(2,j*X) - waveletMinMax[0]);
+		int kMax = (int) Math.floor(Math.pow(2,j*X) - waveletMinMax[1]);
+		int[] kMinMax = new int[2];
 		kMinMax[0] = kMin;
 		kMinMax[1] = kMax;
 		return (kMinMax);
@@ -364,34 +363,54 @@ public class DensityHelper {
 	 */
 	private static double[][] getDensity() {
 		
-		ArrayList<Double> density = new ArrayList<Double> ();
+		int numGridLines = (int) Math.ceil((Settings.getMaximumRange() - Settings.getMinimumRange())
+							/Settings.discretization);
+		double[][] density = new double[numGridLines][numGridLines];
 		double scaleNormalizer = Math.pow(2, Settings.startLevel/2.0);
 		
-		// Calculate un-normalized density for each point in domain
-		for (double i = Settings.getMinimumRange(); 
-				i < Settings.getMaximumRange(); i += Settings.discretization) {
+		double i1 = Settings.getMinimumRange();
+		// Calculate un-normalized density for each point in domain, looping across X1
+		for (int x1Ind = 0; x1Ind < numGridLines; x1Ind++)
+			{			
+			i1 += Settings.discretization;
+			int[] i1RelevantIndices = findRelevantKIndices(i1, Settings.startLevel);
+			int k1Max = i1RelevantIndices[1];
+			int k1Min = i1RelevantIndices[0];
 			
-			// Density at point i
-			double iDense = 0.0;
 			
-			// Cycle through translates for each point
-			int scalIndex = 0;
-			for (double k : Transform.scalingTranslates) {
-				double Xi = Math.pow(2, Settings.startLevel)*i - k;
+			// Cycle through relevant X1 translates for the line
+			for (int k1Ind = k1Min; k1Ind <= k1Max; k1Ind++) {
 				
-				// Only update if the point is supported
-				if (Wavelet.inSupport(Xi)) {
-					iDense += Transform.scalingCoefficients.get(scalIndex) 
-							  * Wavelet.getPhiAt(Xi) * scaleNormalizer;
-				}
-				scalIndex++;
-			}
-			density.add(iDense);
-		}
+				double k1 = Transform.scalingTranslates.get(k1Ind);
+				double Xi1 = Math.pow(2, Settings.startLevel)*i1 - k1;
+				double phi1Here = Wavelet.getPhiAt(Xi1) * scaleNormalizer;
+				
+				// Loop across X2 dimension
+				double i2 = Settings.getMinimumRange();
+				for (int x2Ind = 0; x2Ind < numGridLines; x2Ind++)
+				{
+					i2 += Settings.discretization;
+					int[] i2RelevantIndices = findRelevantKIndices(i2, Settings.startLevel);
+					int k2Max = i2RelevantIndices[1];
+					int k2Min = i2RelevantIndices[0];
+										
+					// Cycle through relevant X2 translates
+					for (int k2Ind = k2Min; k2Ind <= k2Max; k2Ind++) {
+						
+						double k2 = Transform.scalingTranslates.get(k2Ind);
+						double Xi2 = Math.pow(2, Settings.startLevel)*i2 - k2;
+						double phi2Here = Wavelet.getPhiAt(Xi2) * scaleNormalizer;
+						
+						density[x1Ind][x2Ind] += Transform.scalingCoefficients[k1Ind][k2Ind] *
+								phi1Here*phi2Here;
+					} // End cycling relevant X2 translates
+				} // End cycling across X2 gridlines
+			} // End cycling relevant X1 translates
+		} // End cycling across X1 gridlines
 		
-		if (Settings.waveletFlag) {
+/*		if (Settings.waveletFlag) {
 			density = addWaveDensity(density);
-		}
+		}*/
 		
 		//Normalize density
 		density = normalizeDensity(density);
@@ -404,7 +423,7 @@ public class DensityHelper {
 	 * @param density The density from the scaling basis functions
 	 * @return The complete unnormalized density
 	 */
-	private static double[][] addWaveDensity(ArrayList<Double> density) {
+/*	private static double[][] addWaveDensity(ArrayList<Double> density) {
 		
 		// Short hand for start leve
 		int j0 = Settings.startLevel;
@@ -441,7 +460,7 @@ public class DensityHelper {
 		
 		
 		return density;
-	}
+	}*/
 
 	/**
 	 * Takes in an un-normalized density estimate and returns the
@@ -453,26 +472,36 @@ public class DensityHelper {
 	 *                        over the domain range.
 	 * @return the normalized density.
 	 */
-	private static ArrayList<Double> normalizeDensity(ArrayList<Double> unNormDensity){
+	private static double[][] normalizeDensity(double[][] unNormDensity){
 		
-		ArrayList<Double> normDens = unNormDensity;
-		int iter = 0;
-		double threshold = Math.pow(10, -8);
+		// The number of gridlines across the density domain
+		int numGridLines = (int) Math.ceil((Settings.getMaximumRange() - Settings.getMinimumRange())
+				/Settings.discretization);
+		
+		int iter = 0;                        // How many normalization cycles have been performed
+		double threshold = Math.pow(10, -8); // The maximum acceptable error
 		double densityDomainSize = Settings.getMaximumRange() - Settings.getMinimumRange();
+		double[][] normDens = unNormDensity;
 		
 		while (iter < 1000) {
 			
 			// Zero negative points
-			for (int i = 0; i < unNormDensity.size(); i++) {
-				if (normDens.get(i) < 0.0) {
-					normDens.set(i,0.0);
+			for (int i1 = 0; i1 < numGridLines; i1++) {
+				
+				for (int i2 = 0; i2 < numGridLines; i2++) {
+					
+					if (normDens[i1][i2] < 0.0) {
+						normDens[i1][i2] = 0.0;
+					}
 				}
 			}
 			
 			// Sum over probability density over interval
 			double integralSum = 0.0;
-			for (int i = 0; i < unNormDensity.size(); i++) {
-				integralSum += normDens.get(i)*Settings.discretization;
+			for (int i1 = 0; i1 < numGridLines; i1++) {
+				for (int i2 = 0; i2 < numGridLines; i2++) {
+					integralSum += normDens[i1][i2] * Math.pow(Settings.discretization, 2);
+				}
 			}
 			
 			// Return if error is under threshold
@@ -481,10 +510,11 @@ public class DensityHelper {
 			}
 			
 			// Modify density so that it integrates to 1
-			double normalizeConstant = (integralSum - 1) / densityDomainSize;
-			for (int i = 0; i < unNormDensity.size(); i++) {
-				
-				normDens.set(i, normDens.get(i) - normalizeConstant);
+			double normalizeConstant = (integralSum - 1) / Math.pow(densityDomainSize, 2);
+			for (int i1 = 0; i1 < numGridLines; i1++) {
+				for (int i2 = 0; i2 < numGridLines; i2++) {
+					normDens[i1][i2] -= normalizeConstant;
+				}
 			}
 			
 			iter++;
