@@ -9,22 +9,17 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JApplet;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import de.erichseifert.gral.data.DataTable;
-import de.erichseifert.gral.plots.XYPlot;
-import de.erichseifert.gral.plots.areas.AreaRenderer;
-import de.erichseifert.gral.plots.areas.DefaultAreaRenderer2D;
-import de.erichseifert.gral.plots.lines.DefaultLineRenderer2D;
-import de.erichseifert.gral.plots.lines.LineRenderer;
-import de.erichseifert.gral.ui.InteractivePanel;
-import de.erichseifert.gral.util.Insets2D;
+import org.sf.surfaceplot.SurfaceCanvas;
 
 public class EstimatorGUI extends JApplet implements ActionListener {
 
@@ -41,16 +36,23 @@ public class EstimatorGUI extends JApplet implements ActionListener {
 	// The settings panel
 	SettingsUI SettingsFrame;	
 	
-	private XYPlot dataPlot;						 // The plot of the density
-	private InteractivePanel dataPanel;				 // The panel storing the density plot
-	private DataTable densityTable;                  // The density information
-	
 	// The window size
-	private static final int WINDOW_WIDTH  = 600;
-	private static final int WINDOW_HEIGHT = 600;	                   
+	private static final int WINDOW_WIDTH  = 900;
+	private static final int WINDOW_HEIGHT = 600;	
+	
+	// Plot containers.
+	private static SurfaceCanvas canvas = new SurfaceCanvas();
+	private JPanel plotPanel;
+	private JPanel commandPanel;
+	private JLabel rotationLabel;
+	private JLabel zoomLabel;
+	private JLabel moveLabel;
 	
 	// Thread to perform calculations and update plot.
 	private DensityRunner runner;
+	
+	// Data model.
+	DensityModel dataModel;
 	
 	
 	
@@ -68,6 +70,9 @@ public class EstimatorGUI extends JApplet implements ActionListener {
 		catch ( Exception e ) { }
     	DensityHelper.initializeTranslates();
     	DensityHelper.initializeCoefficients();
+    	
+    	// Create the data model.
+    	dataModel = new DensityModel( Settings.discretization, Settings.densityRange );
     	
     	// Initialize the applet's GUI.
     	initializeGUI();
@@ -116,10 +121,24 @@ public class EstimatorGUI extends JApplet implements ActionListener {
     	GUI.add( optionsPanel, BorderLayout.NORTH );
         
         // Create the plot for the data
-        dataPlot = new XYPlot();
+        plotPanel     = new JPanel();
+        commandPanel  = new JPanel();
+        plotPanel.setLayout( new BorderLayout() );
+        commandPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 50, 5));
+        
+        rotationLabel = new JLabel( "Rotate: Mouse Click & Drag" );
+        zoomLabel = new JLabel( "Zoom: Shift Key + Mouse Click & Drag" );
+        moveLabel = new JLabel( "Move: Control Key + Mouse Click & Drag" );
+        
+        commandPanel.add(rotationLabel);
+        commandPanel.add(zoomLabel);
+        commandPanel.add(moveLabel);
+        
+        plotPanel.add(canvas, BorderLayout.CENTER);
         initializePlot();
-        dataPanel = new InteractivePanel( dataPlot );
-        GUI.add( dataPanel, BorderLayout.CENTER );
+        
+        plotPanel.add(commandPanel, BorderLayout.SOUTH);       
+        GUI.add( plotPanel, BorderLayout.CENTER );
         
         // Create the settings UI
         SettingsFrame = new SettingsUI();
@@ -190,35 +209,7 @@ public class EstimatorGUI extends JApplet implements ActionListener {
 	 */
 	private void initializePlot() {
 		
-		// Create the density function data.
-    	densityTable = new DataTable( 2, Double.class );
-        for ( double x = Settings.getMinimumRange(); 
-        		x <= Settings.getMaximumRange() + Settings.discretization;
-        		x += Settings.discretization ) {
-            double y = 0.0;
-            densityTable.add( x, y );
-        }
-        
-        // Initialize the density function to a zero function.
-        DensityHelper.updateDensity( densityTable );
-        
-        // Add the density function to the plot.
-        dataPlot.add( densityTable );
-        
-        LineRenderer lines = new DefaultLineRenderer2D();
-        AreaRenderer area = new DefaultAreaRenderer2D();
-        dataPlot.setLineRenderer( densityTable, lines );  // Set line rendering to the plot.
-        dataPlot.setAreaRenderer( densityTable, area );   // Set area-below-the-curve rendering to the plot.
-        dataPlot.setInsets( new Insets2D.Double( 5, 50, 40, 40 ) ); // Add padding between the plot's frame and applet window.
-        dataPlot.getAxisRenderer( XYPlot.AXIS_Y ).setIntersection( -Double.MAX_VALUE ); // Push the y-axis all the way to the left of the plot.
-        Color invis = new Color( 0.0f, 0.3f, 1.0f, 0 ); 
-        Color lineColor = new Color( 0.0f, 0.3f, 1.0f );
-        Color areaColor = new Color( 0.0f, 0.3f, 1.0f, 0.3f );
-        
-        // Apply colors to the plot's lines, points, and area below the curve.
-        dataPlot.getPointRenderer( densityTable ).setColor( invis ); 
-        dataPlot.getLineRenderer( densityTable ).setColor( lineColor );
-        dataPlot.getAreaRenderer( densityTable ).setColor( areaColor );
+		
 		
 	} // end method private void initializePlot().
 	
@@ -228,7 +219,7 @@ public class EstimatorGUI extends JApplet implements ActionListener {
 	 */
 	private void startDensityEstimation(){
 		
-		runner = new DensityRunner( sampleLabel, this.getWidth(), this.getHeight(), startButton, stopButton, settingsButton, dataPlot, dataPanel );
+		runner = new DensityRunner( sampleLabel, startButton, stopButton, settingsButton, canvas, dataModel );
 		runner.execute();
 	} // end method private void startDensityEstimation().
 	

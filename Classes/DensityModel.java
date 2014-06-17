@@ -11,7 +11,7 @@ import org.sf.surfaceplot.ISurfacePlotModel;
 public class DensityModel implements ISurfacePlotModel{
 	
 	// 2-dimensional array to store the density function.
-	private static float[][] density;
+	private static double[][] density;
 	
 	// Discretization value used in density calculation.
 	private float discretization;
@@ -23,16 +23,19 @@ public class DensityModel implements ISurfacePlotModel{
 	private static float maximumDensity = 0.0f;
 	
 	// Axis Labels.
-	private String xLabel = "X", yLabel = "Y", zLabel = "Z";
+	private String xLabel, yLabel, zLabel;
 	
 	/**
 	 * Constructor.
 	 * @param discretization : discretization value used in density calculation.
 	 * @param domain : domain of the density function.
 	 */
-	public DensityModel(float discretization, double[] domain){
-		this.discretization = discretization;
+	public DensityModel(double discretization, double[] domain){
+		this.discretization = (float) discretization;
 		this.densityDomain  = domain;
+		this.xlabel( "X" );
+		this.ylabel( "Y" );
+		this.zlabel( "Z" );
 	} // end constructor.
 	
 	/**
@@ -54,7 +57,7 @@ public class DensityModel implements ISurfacePlotModel{
 		int yPos = (int) Math.round((y - densityDomain[0]) / discretization );
 		
 		// Retrieve the value of the density at the point.
-		float densityHere = density[xPos][yPos];
+		float densityHere = (float)  density[xPos][yPos];
 		
 		return densityHere;
 	} // end method calculateZ(float x, float y)
@@ -148,7 +151,7 @@ public class DensityModel implements ISurfacePlotModel{
 	 * @param newDensity : new density function approximation.
 	 * @param maxDensity : maximum value of the density function;
 	 */
-	public static void updateDensity(float[][] newDensity, float maxDensity ){
+	public static void updateDensity(double[][] newDensity, float maxDensity ){
 		density        = newDensity;
 		maximumDensity = maxDensity;
 	} // end method updateDensity(float[][] newDensity )
