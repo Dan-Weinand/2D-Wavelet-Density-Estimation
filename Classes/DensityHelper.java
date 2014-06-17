@@ -51,7 +51,7 @@ public class DensityHelper {
 			ageNorm /= (N+1)*1.0;
 		}
 		
-/*		// Scale coefficients if Caudle aging is being used
+		// Scale coefficients if Caudle aging is being used
 		if (Settings.agingFlag == Settings.caudleAge) {
 			for (int x1Index = 0; 
 					x1Index < Transform.scalingCoefficients.length;
@@ -63,7 +63,7 @@ public class DensityHelper {
 				}
 			}
 				
-		}*/
+		}
 		
 		// Recursively compute coefficients if no aging is used
 		else if (Settings.agingFlag == Settings.noAge){
@@ -361,10 +361,9 @@ public class DensityHelper {
 	 *      are the proper size
 	 * @return the normalized density estimate
 	 */
-	private static double[][] getDensity() {
+	public static double[][] getDensity() {
 		
-		int numGridLines = (int) Math.ceil((Settings.getMaximumRange() - Settings.getMinimumRange())
-							/Settings.discretization);
+		int numGridLines = getNumGridlines();
 		double[][] density = new double[numGridLines][numGridLines];
 		double scaleNormalizer = Math.pow(2, Settings.startLevel/2.0);
 		
@@ -475,8 +474,7 @@ public class DensityHelper {
 	private static double[][] normalizeDensity(double[][] unNormDensity){
 		
 		// The number of gridlines across the density domain
-		int numGridLines = (int) Math.ceil((Settings.getMaximumRange() - Settings.getMinimumRange())
-				/Settings.discretization);
+		int numGridLines = getNumGridlines();
 		
 		int iter = 0;                        // How many normalization cycles have been performed
 		double threshold = Math.pow(10, -8); // The maximum acceptable error
@@ -524,15 +522,14 @@ public class DensityHelper {
 		return normDens;
 	} //end normalizeDensity
 	
+	
 	/**
-	 * Updates the plotted density based on current coefficients
+	 * Gives the number of gridlines in the density domain
+	 * @return the number of x1/x2 gridlines in the density domain
 	 */
-	public static void updateDensity() {
-		
-		double[][] normDensity = getDensity();
-		
-		// UPDATE PLOT DENSITY
-
+	private static int getNumGridlines() {
+		return (int) Math.ceil((Settings.getMaximumRange() - Settings.getMinimumRange())
+				/Settings.discretization);
 	}
 	
 }
