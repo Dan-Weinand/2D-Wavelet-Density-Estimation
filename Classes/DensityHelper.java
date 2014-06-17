@@ -361,7 +361,7 @@ public class DensityHelper {
 	 *      are the proper size
 	 * @return the normalized density estimate
 	 */
-	public static double[][] getDensity() {
+	public static void newDensity() {
 		
 		int numGridLines = getNumGridlines();
 		double[][] density = new double[numGridLines][numGridLines];
@@ -414,7 +414,16 @@ public class DensityHelper {
 		//Normalize density
 		density = normalizeDensity(density);
 		
-		return(density);
+		// Find the maximum normalized density
+		float maxDens = (float) 0.0;
+		for (int x1Ind = 0; x1Ind < numGridLines; x1Ind++) {
+			for (int x2Ind = 0; x2Ind < numGridLines; x2Ind++) {
+				if (density[x1Ind][x2Ind] > maxDens) maxDens = (float) density[x1Ind][x2Ind];
+			}
+		}
+		
+		// Update the plot's density
+		DensityModel.updateDensity(density, maxDens);
 	}
 	
 	/**
