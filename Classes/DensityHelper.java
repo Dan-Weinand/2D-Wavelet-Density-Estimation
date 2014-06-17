@@ -8,11 +8,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 
-
 public class DensityHelper {
 	
-	private static double[][] oldSamples;		// The old samples in the window
+	private static double[][] oldSamples;	// The old samples in the window
 	private static int N;					// How many samples have been read in
+	
+	// The phi values over the density domain gridlines
+	private static ArrayList<ArrayList<Double>> phi1sHere;
+	private static ArrayList<ArrayList<Double>> phi2sHere;
+	
 	
 	/**
 	 * Checks that the sample point X is within the domain of the density function.
@@ -317,7 +321,45 @@ public class DensityHelper {
 				Transform.waveletTranslates.add(jTranslates);
 			}
 		}
+		
+		initializePhiGrid();
 	} //end initializeTranslates
+	
+	/**
+	 * Initializes the arrays which hold the phi values over the
+	 * density domain gridlines
+	 */
+	private static void initializePhiGrid() {
+		
+		phi1sHere = new ArrayList<ArrayList<Double>> ();
+		int numGridLines = getNumGridlines();
+		double scaleNormalizer = Math.pow(2, Settings.startLevel/2.0);
+		double i1 = 0.0;
+		
+		for (int x1Ind = 0; x1Ind < numGridLines; x1Ind++)
+			{		
+			
+			ArrayList<Double> thesePhis = new ArrayList<Double> ();
+			i1 += Settings.discretization;
+			int[] i1RelevantIndices = findRelevantKIndices(i1, Settings.startLevel);
+			int k1Max = i1RelevantIndices[1];
+			int k1Min = i1RelevantIndices[0];
+		
+		
+			// Cycle through relevant X1 translates for the line
+			for (int k1Ind = k1Min; k1Ind <= k1Max; k1Ind++) {
+			
+				double k1 = Transform.scalingTranslates.get(k1Ind);
+				double Xi1 = Math.pow(2, Settings.startLevel)*i1 - k1;
+				double phi1Here = Wavelet.getPhiAt(Xi1) * scaleNormalizer;
+				thesePhis.add(phi1Here);
+			
+			}
+			phi1sHere.add(thesePhis);
+		}
+		
+
+	}
 	
 	/**
 	 * Initializes the arrays to hold the scaling basis function
