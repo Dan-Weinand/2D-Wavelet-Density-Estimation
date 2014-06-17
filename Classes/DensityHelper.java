@@ -14,8 +14,7 @@ public class DensityHelper {
 	private static int N;					// How many samples have been read in
 	
 	// The phi values over the density domain gridlines
-	private static ArrayList<ArrayList<Double>> phi1sHere;
-	private static ArrayList<ArrayList<Double>> phi2sHere;
+	private static ArrayList<ArrayList<Double>> phisHere;
 	
 	
 	/**
@@ -277,11 +276,12 @@ public class DensityHelper {
 		// Get the max & min values for the wavelet's support
 		double[] waveletMinMax = Wavelet.getSupport();
 		
-		int kMin = (int) Math.ceil(Math.pow(2,j*X) - waveletMinMax[0]);
-		int kMax = (int) Math.floor(Math.pow(2,j*X) - waveletMinMax[1]);
+		int minimumAllowedTranslate = (int) Math.floor(Transform.scalingTranslates.get(0));
+		int kMax = (int) Math.ceil(Math.pow(2,j) * X - waveletMinMax[0]);
+		int kMin = (int) Math.floor(Math.pow(2,j) * X - waveletMinMax[1]);
 		int[] kMinMax = new int[2];
-		kMinMax[0] = kMin;
-		kMinMax[1] = kMax;
+		kMinMax[0] = kMin - minimumAllowedTranslate;
+		kMinMax[1] = kMax - minimumAllowedTranslate;
 		return (kMinMax);
 		
 	} //end findRelevantKIndices
@@ -322,7 +322,7 @@ public class DensityHelper {
 			}
 		}
 		
-		initializePhiGrid();
+		//initializePhiGrid();
 	} //end initializeTranslates
 	
 	/**
@@ -331,7 +331,7 @@ public class DensityHelper {
 	 */
 	private static void initializePhiGrid() {
 		
-		phi1sHere = new ArrayList<ArrayList<Double>> ();
+		phisHere = new ArrayList<ArrayList<Double>> ();
 		int numGridLines = getNumGridlines();
 		double scaleNormalizer = Math.pow(2, Settings.startLevel/2.0);
 		double i1 = 0.0;
@@ -347,15 +347,15 @@ public class DensityHelper {
 		
 		
 			// Cycle through relevant X1 translates for the line
-			for (int k1Ind = k1Min; k1Ind <= k1Max; k1Ind++) {
+			for (int k1Ind = k1Min; k1Ind < k1Max; k1Ind++) {
 			
-				double k1 = Transform.scalingTranslates.get(k1Ind);
-				double Xi1 = Math.pow(2, Settings.startLevel)*i1 - k1;
+				double k1 = Transform.scalingTranslates.get(k1Ind - 1);
+				double Xi1 = Math.pow(2, Settings.startLevel) * i1 - k1;
 				double phi1Here = Wavelet.getPhiAt(Xi1) * scaleNormalizer;
 				thesePhis.add(phi1Here);
 			
 			}
-			phi1sHere.add(thesePhis);
+			phisHere.add(thesePhis);
 		}
 		
 
@@ -411,15 +411,15 @@ public class DensityHelper {
 		double i1 = Settings.getMinimumRange();
 		// Calculate un-normalized density for each point in domain, looping across X1
 		for (int x1Ind = 0; x1Ind < numGridLines; x1Ind++)
-			{			
+			{
+			System.out.println("X1 progress is " + x1Ind);
 			i1 += Settings.discretization;
 			int[] i1RelevantIndices = findRelevantKIndices(i1, Settings.startLevel);
 			int k1Max = i1RelevantIndices[1];
-			int k1Min = i1RelevantIndices[0];
-			
+			int k1Min = i1RelevantIndices[0];					
 			
 			// Cycle through relevant X1 translates for the line
-			for (int k1Ind = k1Min; k1Ind <= k1Max; k1Ind++) {
+			for (int k1Ind = k1Min; k1Ind < k1Max; k1Ind++) {
 				
 				double k1 = Transform.scalingTranslates.get(k1Ind);
 				double Xi1 = Math.pow(2, Settings.startLevel)*i1 - k1;
@@ -435,7 +435,7 @@ public class DensityHelper {
 					int k2Min = i2RelevantIndices[0];
 										
 					// Cycle through relevant X2 translates
-					for (int k2Ind = k2Min; k2Ind <= k2Max; k2Ind++) {
+					for (int k2Ind = k2Min; k2Ind < k2Max; k2Ind++) {
 						
 						double k2 = Transform.scalingTranslates.get(k2Ind);
 						double Xi2 = Math.pow(2, Settings.startLevel)*i2 - k2;
@@ -530,6 +530,16 @@ public class DensityHelper {
 		double threshold = Math.pow(10, -8); // The maximum acceptable error
 		double densityDomainSize = Settings.getMaximumRange() - Settings.getMinimumRange();
 		double[][] normDens = unNormDensity;
+		
+		double sumall = 0.0;
+		for (int i1 = 0; i1 < numGridLines; i1++) {
+			
+			for (int i2 = 0; i2 < numGridLines; i2++) {
+				
+				sumall += unNormDensity[i1][i2];
+			}
+		}
+		System.out.println("Unnormed sum is" + sumall);
 		
 		while (iter < 1000) {
 			
