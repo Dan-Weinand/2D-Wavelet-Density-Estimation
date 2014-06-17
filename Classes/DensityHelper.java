@@ -110,7 +110,7 @@ public class DensityHelper {
 							
 							// Update appropriate coefficient iff in x2 support
 							if (Wavelet.inSupport(x2Scaled)) {
-								double phi2Here = scaleNormalizer*Wavelet.getPhiAt(x1Scaled);
+								double phi2Here = scaleNormalizer*Wavelet.getPhiAt(x2Scaled);
 								double coeffSub = phi1Here*phi2Here/Settings.windowSize;
 								
 								Transform.scalingCoefficients[x1Ind][x2Ind] -= coeffSub;
