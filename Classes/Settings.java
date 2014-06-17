@@ -21,13 +21,13 @@ public class Settings {
 	//      0: no aging.
 	//      1: Caudle aging method.
 	//      2: Window method.
-	public static int agingFlag        = 2;
+	public static int agingFlag        = 1;
 	public static final int noAge      = 0;
 	public static final int caudleAge  = 1;
 	public static final int windowAge  = 2;
 	
 	// The distance between points in the density estimation plot
-	public static double discretization = .01; 
+	public static double discretization = .1; 
 	
 	// How many samples to wait in between plot updates
 	public static int updateFrequency = 100;

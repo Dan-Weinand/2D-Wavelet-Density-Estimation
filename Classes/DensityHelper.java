@@ -150,7 +150,7 @@ public class DensityHelper {
 					
 					// Update appropriate coefficient iff in x2 support
 					if (Wavelet.inSupport(x2Scaled)) {
-						double phi2Here = scaleNormalizer*Wavelet.getPhiAt(x1Scaled);
+						double phi2Here = scaleNormalizer*Wavelet.getPhiAt(x2Scaled);
 						double coeffAdd = phi1Here*phi2Here*ageNorm;
 						
 						Transform.scalingCoefficients[x1Ind][x2Ind] += coeffAdd;
@@ -412,7 +412,6 @@ public class DensityHelper {
 		// Calculate un-normalized density for each point in domain, looping across X1
 		for (int x1Ind = 0; x1Ind < numGridLines; x1Ind++)
 			{
-			System.out.println("X1 progress is " + x1Ind);
 			i1 += Settings.discretization;
 			int[] i1RelevantIndices = findRelevantKIndices(i1, Settings.startLevel);
 			int k1Max = i1RelevantIndices[1];
