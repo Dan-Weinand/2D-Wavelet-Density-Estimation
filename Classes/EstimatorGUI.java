@@ -17,14 +17,6 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import de.erichseifert.gral.data.DataTable;
-import de.erichseifert.gral.plots.XYPlot;
-import de.erichseifert.gral.plots.areas.AreaRenderer;
-import de.erichseifert.gral.plots.areas.DefaultAreaRenderer2D;
-import de.erichseifert.gral.plots.lines.DefaultLineRenderer2D;
-import de.erichseifert.gral.plots.lines.LineRenderer;
-import de.erichseifert.gral.ui.InteractivePanel;
-import de.erichseifert.gral.util.Insets2D;
 
 public class EstimatorGUI extends JApplet implements ActionListener {
 
@@ -41,12 +33,8 @@ public class EstimatorGUI extends JApplet implements ActionListener {
 	// The settings panel
 	SettingsUI SettingsFrame;	
 	
-	private XYPlot dataPlot;						 // The plot of the density
-	private InteractivePanel dataPanel;				 // The panel storing the density plot
-	private DataTable densityTable;                  // The density information
-	
 	// The window size
-	private static final int WINDOW_WIDTH  = 600;
+	private static final int WINDOW_WIDTH  = 900;
 	private static final int WINDOW_HEIGHT = 600;	                   
 	
 	// Thread to perform calculations and update plot.
@@ -190,35 +178,7 @@ public class EstimatorGUI extends JApplet implements ActionListener {
 	 */
 	private void initializePlot() {
 		
-		// Create the density function data.
-    	densityTable = new DataTable( 2, Double.class );
-        for ( double x = Settings.getMinimumRange(); 
-        		x <= Settings.getMaximumRange() + Settings.discretization;
-        		x += Settings.discretization ) {
-            double y = 0.0;
-            densityTable.add( x, y );
-        }
-        
-        // Initialize the density function to a zero function.
-        DensityHelper.updateDensity( densityTable );
-        
-        // Add the density function to the plot.
-        dataPlot.add( densityTable );
-        
-        LineRenderer lines = new DefaultLineRenderer2D();
-        AreaRenderer area = new DefaultAreaRenderer2D();
-        dataPlot.setLineRenderer( densityTable, lines );  // Set line rendering to the plot.
-        dataPlot.setAreaRenderer( densityTable, area );   // Set area-below-the-curve rendering to the plot.
-        dataPlot.setInsets( new Insets2D.Double( 5, 50, 40, 40 ) ); // Add padding between the plot's frame and applet window.
-        dataPlot.getAxisRenderer( XYPlot.AXIS_Y ).setIntersection( -Double.MAX_VALUE ); // Push the y-axis all the way to the left of the plot.
-        Color invis = new Color( 0.0f, 0.3f, 1.0f, 0 ); 
-        Color lineColor = new Color( 0.0f, 0.3f, 1.0f );
-        Color areaColor = new Color( 0.0f, 0.3f, 1.0f, 0.3f );
-        
-        // Apply colors to the plot's lines, points, and area below the curve.
-        dataPlot.getPointRenderer( densityTable ).setColor( invis ); 
-        dataPlot.getLineRenderer( densityTable ).setColor( lineColor );
-        dataPlot.getAreaRenderer( densityTable ).setColor( areaColor );
+		
 		
 	} // end method private void initializePlot().
 	
