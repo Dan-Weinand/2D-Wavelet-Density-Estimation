@@ -9,14 +9,17 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JApplet;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.sf.surfaceplot.SurfaceCanvas;
 
 public class EstimatorGUI extends JApplet implements ActionListener {
 
@@ -35,10 +38,21 @@ public class EstimatorGUI extends JApplet implements ActionListener {
 	
 	// The window size
 	private static final int WINDOW_WIDTH  = 900;
-	private static final int WINDOW_HEIGHT = 600;	                   
+	private static final int WINDOW_HEIGHT = 600;	
+	
+	// Plot containers.
+	private static SurfaceCanvas canvas = new SurfaceCanvas();
+	private JPanel plotPanel;
+	private JPanel commandPanel;
+	private JLabel rotationLabel;
+	private JLabel zoomLabel;
+	private JLabel moveLabel;
 	
 	// Thread to perform calculations and update plot.
 	private DensityRunner runner;
+	
+	// Data model.
+	DensityModel dataModel;
 	
 	
 	
@@ -56,6 +70,9 @@ public class EstimatorGUI extends JApplet implements ActionListener {
 		catch ( Exception e ) { }
     	DensityHelper.initializeTranslates();
     	DensityHelper.initializeCoefficients();
+    	
+    	// Create the data model.
+    	dataModel = new DensityModel( Settings.discretization, Settings.densityRange );
     	
     	// Initialize the applet's GUI.
     	initializeGUI();
@@ -104,10 +121,24 @@ public class EstimatorGUI extends JApplet implements ActionListener {
     	GUI.add( optionsPanel, BorderLayout.NORTH );
         
         // Create the plot for the data
-        dataPlot = new XYPlot();
+        plotPanel     = new JPanel();
+        commandPanel  = new JPanel();
+        plotPanel.setLayout( new BorderLayout() );
+        commandPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 50, 5));
+        
+        rotationLabel = new JLabel( "Rotate: Mouse Click & Drag" );
+        zoomLabel = new JLabel( "Zoom: Shift Key + Mouse Click & Drag" );
+        moveLabel = new JLabel( "Move: Control Key + Mouse Click & Drag" );
+        
+        commandPanel.add(rotationLabel);
+        commandPanel.add(zoomLabel);
+        commandPanel.add(moveLabel);
+        
+        plotPanel.add(canvas, BorderLayout.CENTER);
         initializePlot();
-        dataPanel = new InteractivePanel( dataPlot );
-        GUI.add( dataPanel, BorderLayout.CENTER );
+        
+        plotPanel.add(commandPanel, BorderLayout.SOUTH);       
+        GUI.add( plotPanel, BorderLayout.CENTER );
         
         // Create the settings UI
         SettingsFrame = new SettingsUI();
@@ -188,7 +219,7 @@ public class EstimatorGUI extends JApplet implements ActionListener {
 	 */
 	private void startDensityEstimation(){
 		
-		runner = new DensityRunner( sampleLabel, this.getWidth(), this.getHeight(), startButton, stopButton, settingsButton, dataPlot, dataPanel );
+		runner = new DensityRunner( sampleLabel, startButton, stopButton, settingsButton, canvas, dataModel );
 		runner.execute();
 	} // end method private void startDensityEstimation().
 	
