@@ -7,7 +7,6 @@
 import java.util.ArrayList;
 import java.util.Collections;
 
-import de.erichseifert.gral.data.DataTable;
 
 
 public class DensityHelper {

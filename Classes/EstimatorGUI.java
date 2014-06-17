@@ -7,7 +7,6 @@
  */
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -41,7 +40,7 @@ public class EstimatorGUI extends JApplet implements ActionListener {
 	private static final int WINDOW_HEIGHT = 600;	
 	
 	// Plot containers.
-	private static SurfaceCanvas canvas = new SurfaceCanvas();
+	private SurfaceCanvas canvas = new SurfaceCanvas();
 	private JPanel plotPanel;
 	private JPanel commandPanel;
 	private JLabel rotationLabel;
@@ -136,6 +135,7 @@ public class EstimatorGUI extends JApplet implements ActionListener {
         
         plotPanel.add(canvas, BorderLayout.CENTER);
         initializePlot();
+        canvas.setModel(dataModel);
         
         plotPanel.add(commandPanel, BorderLayout.SOUTH);       
         GUI.add( plotPanel, BorderLayout.CENTER );
@@ -209,7 +209,20 @@ public class EstimatorGUI extends JApplet implements ActionListener {
 	 */
 	private void initializePlot() {
 		
+		float incX = (float)(dataModel.getXMax() / dataModel.getCalcDivisions());
+		float incY = (float)(dataModel.getYMax() / dataModel.getCalcDivisions());
+		int iMax = (int)(dataModel.getXMax() / incX);
+		int jMax = (int)(dataModel.getYMax() / incY);
+		double[][] zvals = new double[iMax+1][jMax+1];
+		for(int i = 0; i <= iMax; i++)
+		{
+			for(int j = 0; j <= jMax; j++)
+			{
+				zvals[i][j] = 0;
+			}
+		}
 		
+		DensityModel.updateDensity(zvals, 1.5f);
 		
 	} // end method private void initializePlot().
 	
@@ -221,6 +234,7 @@ public class EstimatorGUI extends JApplet implements ActionListener {
 		
 		runner = new DensityRunner( sampleLabel, startButton, stopButton, settingsButton, canvas, dataModel );
 		runner.execute();
+
 	} // end method private void startDensityEstimation().
 	
 } // end class EstimatorGUI.

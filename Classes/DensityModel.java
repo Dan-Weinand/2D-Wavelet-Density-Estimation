@@ -11,7 +11,7 @@ import org.sf.surfaceplot.ISurfacePlotModel;
 public class DensityModel implements ISurfacePlotModel{
 	
 	// 2-dimensional array to store the density function.
-	private static double[][] density;
+	public static double[][] density;
 	
 	// Discretization value used in density calculation.
 	private float discretization;
@@ -20,7 +20,7 @@ public class DensityModel implements ISurfacePlotModel{
 	private double[] densityDomain;
 	
 	// Maximum value of the density function.
-	private static float maximumDensity = 0.0f;
+	public static float maximumDensity = 0.0f;
 	
 	// Axis Labels.
 	private String xLabel, yLabel, zLabel;
@@ -53,8 +53,8 @@ public class DensityModel implements ISurfacePlotModel{
 		}
 		
 		// Get the index positions of the point in the density table.
-		int xPos = (int) Math.round((x - densityDomain[0]) / discretization );
-		int yPos = (int) Math.round((y - densityDomain[0]) / discretization );
+		int xPos = (int) ((x - densityDomain[0]) / discretization );
+		int yPos = (int) ((y - densityDomain[0]) / discretization );
 		
 		// Retrieve the value of the density at the point.
 		float densityHere = (float)  density[xPos][yPos];
@@ -170,4 +170,8 @@ public class DensityModel implements ISurfacePlotModel{
 		
 		return true;
 	} // end method isWithinDensityDomain( float x , float y)
+	
+	public static double[][] getDensity(){
+		return density;
+	}
 }

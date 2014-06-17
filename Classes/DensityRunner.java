@@ -58,7 +58,7 @@ public class DensityRunner extends SwingWorker<Object, Integer>{
 	 * This method is an implementation of the SwingWorker's abstract 
 	 * method protected <Type> doInBackground.
 	 */
-	protected Object doInBackground(){
+	protected Object doInBackground(){		
 		
 		// Initialize the algorithm variables
 		try { Wavelet.init( Settings.waveletType ); } 
@@ -98,11 +98,16 @@ public class DensityRunner extends SwingWorker<Object, Integer>{
 						Thread.sleep( 500 );
 						
 					} // end try Thread.sleep( 500 ).
-					catch(InterruptedException ex){}
+					catch(InterruptedException ex){ex.printStackTrace();}
 				} // end while( paused ).
 				
 				// Get the next sample.
-				double[] sample = {Double.parseDouble( dataReader.readLine() ), Double.parseDouble( dataReader.readLine() )};
+				double[] sample = new double[2];
+				String lineContent = dataReader.readLine();
+				String[] parts = lineContent.split(",");
+				sample[0] = Double.parseDouble(parts[0]);
+				sample[1] = Double.parseDouble(parts[1]);
+
 				
 				// Update the wavelet's coefficients using the new sample.
 				DensityHelper.updateCoefficients( sample );
@@ -112,8 +117,10 @@ public class DensityRunner extends SwingWorker<Object, Integer>{
 				{
 					// Update the density using the current coefficients.
 					DensityHelper.newDensity();
-					
-					canvas.setModel(dataModel);
+// ----------------------------------------------------------------------					
+					System.out.println(DensityModel.maximumDensity);
+
+					//
 					
 					// Send the current sample index to the process method
 					// for updating the sample index label in the applet.
@@ -129,7 +136,7 @@ public class DensityRunner extends SwingWorker<Object, Integer>{
 					Thread.sleep( 1 );
 					
 				} // end try{ Thread.sleep ( 1 ) }
-				catch( InterruptedException ex){}
+				catch( InterruptedException ex){ex.printStackTrace();}
 				
 				// Increment the sample index.
 				sampInd++;
@@ -139,7 +146,7 @@ public class DensityRunner extends SwingWorker<Object, Integer>{
 			dataReader.close();
 			
 		} // end the main try{}
-		catch(Exception ex){}
+		catch(Exception ex){ ex.printStackTrace();}
 		
 		// doInBackground has to return an object.
 		// We return null as there is no meaningful object returned by this method.
@@ -173,7 +180,7 @@ public class DensityRunner extends SwingWorker<Object, Integer>{
 		
 		// Update the sample index label in the applet.
 		sampLabel.setText( sampIndex.toString() );
-		
+		canvas.setModel(dataModel);
 		
 		// Repaint the plot.
 		canvas.repaint();
