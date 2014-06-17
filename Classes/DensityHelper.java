@@ -322,7 +322,7 @@ public class DensityHelper {
 			}
 		}
 		
-		//initializePhiGrid();
+		initializePhiGrid();
 	} //end initializeTranslates
 	
 	/**
@@ -334,7 +334,7 @@ public class DensityHelper {
 		phisHere = new ArrayList<ArrayList<Double>> ();
 		int numGridLines = getNumGridlines();
 		double scaleNormalizer = Math.pow(2, Settings.startLevel/2.0);
-		double i1 = 0.0;
+		double i1 = Settings.getMinimumRange();
 		
 		for (int x1Ind = 0; x1Ind < numGridLines; x1Ind++)
 			{		
@@ -349,7 +349,7 @@ public class DensityHelper {
 			// Cycle through relevant X1 translates for the line
 			for (int k1Ind = k1Min; k1Ind < k1Max; k1Ind++) {
 			
-				double k1 = Transform.scalingTranslates.get(k1Ind - 1);
+				double k1 = Transform.scalingTranslates.get(k1Ind);
 				double Xi1 = Math.pow(2, Settings.startLevel) * i1 - k1;
 				double phi1Here = Wavelet.getPhiAt(Xi1) * scaleNormalizer;
 				thesePhis.add(phi1Here);
@@ -420,9 +420,7 @@ public class DensityHelper {
 			// Cycle through relevant X1 translates for the line
 			for (int k1Ind = k1Min; k1Ind < k1Max; k1Ind++) {
 				
-				double k1 = Transform.scalingTranslates.get(k1Ind);
-				double Xi1 = Math.pow(2, Settings.startLevel)*i1 - k1;
-				double phi1Here = Wavelet.getPhiAt(Xi1) * scaleNormalizer;
+				double phi1Here = phisHere.get(x1Ind).get(k1Ind - k1Min);
 				
 				// Loop across X2 dimension
 				double i2 = Settings.getMinimumRange();
@@ -436,9 +434,7 @@ public class DensityHelper {
 					// Cycle through relevant X2 translates
 					for (int k2Ind = k2Min; k2Ind < k2Max; k2Ind++) {
 						
-						double k2 = Transform.scalingTranslates.get(k2Ind);
-						double Xi2 = Math.pow(2, Settings.startLevel)*i2 - k2;
-						double phi2Here = Wavelet.getPhiAt(Xi2) * scaleNormalizer;
+						double phi2Here = phisHere.get(x2Ind).get(k2Ind - k2Min);
 						
 						density[x1Ind][x2Ind] += Transform.scalingCoefficients[k1Ind][k2Ind] *
 								phi1Here*phi2Here;
@@ -538,7 +534,6 @@ public class DensityHelper {
 				sumall += unNormDensity[i1][i2];
 			}
 		}
-		System.out.println("Unnormed sum is" + sumall);
 		
 		while (iter < 1000) {
 			

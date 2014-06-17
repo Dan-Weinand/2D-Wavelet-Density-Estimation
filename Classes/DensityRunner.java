@@ -118,7 +118,6 @@ public class DensityRunner extends SwingWorker<Object, Integer>{
 					// Update the density using the current coefficients.
 					DensityHelper.newDensity();
 // ----------------------------------------------------------------------					
-					System.out.println(DensityModel.maximumDensity);
 
 					//
 					
