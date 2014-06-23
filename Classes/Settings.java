@@ -6,10 +6,10 @@
 public class Settings {
 	
 	// Start level for both the scaling and wavelet functions.
-	public static int startLevel       = 1;
+	public static double startLevel       = 1;
 	
 	// Stop level for both the scaling and wavelet functions.
-	public static int stopLevel        = 1;
+	public static double stopLevel        = 1;
 	
 	// Type of wavelet used.
 	public static String waveletType   = "db6";
@@ -21,7 +21,7 @@ public class Settings {
 	//      0: no aging.
 	//      1: Caudle aging method.
 	//      2: Window method.
-	public static int agingFlag        = 1;
+	public static int agingFlag        = 2;
 	public static final int noAge      = 0;
 	public static final int caudleAge  = 1;
 	public static final int windowAge  = 2;

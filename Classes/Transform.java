@@ -11,9 +11,9 @@ public class Transform {
 	public static double[][] scalingCoefficients;
 	
 	// wavelet function's coefficients.
-	public static ArrayList<Double[][]> psiPsiCoefficients;
-	public static ArrayList<Double[][]> psiPhiCoefficients;
-	public static ArrayList<Double[][]> phiPsiCoefficients;
+	public static ArrayList<double[][]> psiPsiCoefficients;
+	public static ArrayList<double[][]> psiPhiCoefficients;
+	public static ArrayList<double[][]> phiPsiCoefficients;
 	
 	// Scaling function's translates.
 	public static ArrayList<Double> scalingTranslates;

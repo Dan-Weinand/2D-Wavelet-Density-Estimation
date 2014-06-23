@@ -194,12 +194,12 @@ public class SettingsUI extends JFrame{
 		
 		
 		// Process all integer-valued settings.
-		Settings.startLevel        = Integer.parseInt(startLevel.getText());
-		Settings.stopLevel         = Integer.parseInt(stopLevel.getText());
 		Settings.windowSize        = Integer.parseInt(windowSize.getText());
 		Settings.updateFrequency   = Integer.parseInt(updateFrequency.getText());
 		
 		// Process all real-valued settings.
+		Settings.startLevel        = Double.parseDouble(startLevel.getText());
+		Settings.stopLevel         = Double.parseDouble(stopLevel.getText());
 		Settings.discretization    = Double.parseDouble(discretization.getText());
 		Settings.agingTheta        = Double.parseDouble(agingTheta.getText());
 		Settings.densityRange[0]   = Double.parseDouble(densityRangeFrom.getText());
