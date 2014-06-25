@@ -5,7 +5,6 @@
  * 
  */
 import java.util.ArrayList;
-import java.util.Collections;
 
 
 public class DensityHelper {
@@ -13,9 +12,13 @@ public class DensityHelper {
 	private static double[][] oldSamples;	// The old samples in the window
 	private static int N;					// How many samples have been read in
 	private static double postProb = 0.0;   // Posterior probability score
+	private static double[][] oldDensity;   // The old density distribution, used for KS statistics
 	
 	// Whether or not to calculate and print a cross validation score
 	private static boolean postProbOn = false; 
+	
+	// Whether or not to display the CDF instead of the pdf
+	private static boolean useCDF = true;
 	
 	// The phi values over the density domain gridlines
 	private static ArrayList<ArrayList<Double>> scalePhisHere;
@@ -551,9 +554,39 @@ public class DensityHelper {
 		// Find the maximum normalized density
 		float maxDens = (float) 0.0;
 		for (int x1Ind = 0; x1Ind < numGridLines; x1Ind++) {
+			
 			for (int x2Ind = 0; x2Ind < numGridLines; x2Ind++) {
-				if (density[x1Ind][x2Ind] > maxDens) maxDens = (float) density[x1Ind][x2Ind];
+				if (density[x1Ind][x2Ind] > maxDens) {
+					maxDens = (float) density[x1Ind][x2Ind];
+				}
+				
+				// PDF to CDF conversion
+				if (useCDF) {
+					density[x1Ind][x2Ind] *= Math.pow(Settings.discretization,  2);
+					
+					if (x1Ind == 0) {
+						
+						if (x2Ind != 0) {
+							density[x1Ind][x2Ind] += density[x1Ind][x2Ind - 1];
+						}
+						
+					}
+					
+					else {
+						if (x2Ind != 0) {
+							density[x1Ind][x2Ind] += density[x1Ind - 1][x2Ind] + density[x1Ind][x2Ind - 1];
+							density[x1Ind][x2Ind] -= density[x1Ind - 1][x2Ind - 1];
+						}
+						
+					}
+				} // End CDF conversion
+				
 			}
+		}
+		
+		if (useCDF) {
+			maxDens = 1;
+			oldDensity = density;
 		}
 		
 		// Update the plot's density
@@ -699,15 +732,6 @@ public class DensityHelper {
 		double threshold = Math.pow(10, -8); // The maximum acceptable error
 		double densityDomainSize = Settings.getMaximumRange() - Settings.getMinimumRange();
 		double[][] normDens = unNormDensity;
-		
-		double sumall = 0.0;
-		for (int i1 = 0; i1 < numGridLines; i1++) {
-			
-			for (int i2 = 0; i2 < numGridLines; i2++) {
-				
-				sumall += unNormDensity[i1][i2];
-			}
-		}
 		
 		while (iter < 1000) {
 			

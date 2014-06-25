@@ -1,7 +1,6 @@
 import java.util.ArrayList;
 import java.io.*;
 import java.util.List;
-import java.util.ArrayList;
 
 import au.com.bytecode.opencsv.CSVReader;
 /**
@@ -11,9 +10,6 @@ import au.com.bytecode.opencsv.CSVReader;
  * 
  */
 public class Wavelet {
-	
-	// Type of the wavelet.
-	private static String waveletType;
 	
 	// The domain for the wavelet used.
 	// This called "supp" in the MATLAB implementation.
