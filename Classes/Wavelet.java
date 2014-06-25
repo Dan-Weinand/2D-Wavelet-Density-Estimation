@@ -32,9 +32,6 @@ public class Wavelet {
 	 */
 	public static void init(String wavType) throws IOException{
 		
-		// Set the wavelet type.
-		Wavelet.waveletType = wavType;
-		
 		// Find the support for the given wavelet.
 		initializeSupport(wavType);
 		
