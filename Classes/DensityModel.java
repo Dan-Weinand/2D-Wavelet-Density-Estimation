@@ -92,7 +92,7 @@ public class DensityModel implements ISurfacePlotModel{
 	
 	public int getCalcDivisions(){
 		return (int) ( (densityDomain[1] - densityDomain[0]) / discretization + 1);
-		//return 50;
+
 	} // end getCalcDivisions()
 	
 	public int getDispDivisions(){
@@ -153,7 +153,7 @@ public class DensityModel implements ISurfacePlotModel{
 	 */
 	public static void updateDensity(double[][] newDensity, float maxDensity ){
 		density        = newDensity;
-		maximumDensity = maxDensity;
+		maximumDensity = (float) (Math.ceil(maxDensity*8.0)/8.0); // Round value for display
 	} // end method updateDensity(float[][] newDensity )
 	
 	/**

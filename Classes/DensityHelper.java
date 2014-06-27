@@ -18,7 +18,10 @@ public class DensityHelper {
 	private static boolean postProbOn = false; 
 	
 	// Whether or not to display the CDF instead of the pdf
-	private static boolean useCDF = true;
+	private static boolean useCDF = false;
+	
+	// Whether or not to compute the mutual information
+	private static boolean useMutual = false;
 	
 	// The phi values over the density domain gridlines
 	private static ArrayList<ArrayList<Double>> scalePhisHere;
@@ -46,13 +49,12 @@ public class DensityHelper {
 	public static void updateCoefficients(double[] Xnew){
 		
 		// Calculate Posterior probability of data point
-		if (postProbOn && inRange(Xnew[0]) && inRange(Xnew[1])) {
-			double[][] density = calculateDensity();
+		if (postProbOn && inRange(Xnew[0]) && inRange(Xnew[1]) && (N > Settings.updateFrequency)) {
 			int X1newInd = (int) Math.floor((Xnew[0] - Settings.getMinimumRange())
 					/ Settings.discretization);
 			int X2newInd = (int) Math.floor((Xnew[1] - Settings.getMinimumRange())
 					/ Settings.discretization);
-			double XnewDensity = density[X1newInd][X2newInd];
+			double XnewDensity = oldDensity[X1newInd][X2newInd];
 			if (XnewDensity <= .0001) {
 				postProb -= 9.2;
 			}
@@ -579,14 +581,21 @@ public class DensityHelper {
 						}
 						
 					}
+					
+					maxDens = 1;
 				} // End CDF conversion
 				
 			}
 		}
 		
-		if (useCDF) {
-			maxDens = 1;
+		// Store this density distribution to be used in calculating post probability score
+		if (postProbOn) {
 			oldDensity = density;
+		}
+		
+		// Calculate and print the mutual information
+		if (useMutual) {
+			displayMutualInformation(density, numGridLines);
 		}
 		
 		// Update the plot's density
@@ -783,6 +792,51 @@ public class DensityHelper {
 		return (int) Math.ceil((Settings.getMaximumRange() - Settings.getMinimumRange())
 				/Settings.discretization);
 	}
+	
+	/**
+	 * Calculates and prints the mutual information of the two variables
+	 * @param density The current density estimate
+	 * @param numGridLines The number of gridlines in the plot
+	 */
+	private static void displayMutualInformation (double[][] density, int numGridLines) {
+		
+		double mutualInfo = 0.0;
+		
+		// Calculate marginal probability in x1 direction
+		ArrayList<Double> x1MarginalProb = new ArrayList<Double> ();
+		for (int x1Ind = 0; x1Ind < numGridLines; x1Ind++) {
+			
+			Double margProb = 0.0;
+			for (int x2Ind = 0; x2Ind < numGridLines; x2Ind++) {
+				margProb += density[x1Ind][x2Ind];
+			}
+			x1MarginalProb.add(margProb);
+		}
+		
+		// Calculate marginal probability in x2 direction
+		ArrayList<Double> x2MarginalProb = new ArrayList<Double> ();
+		for (int x2Ind = 0; x2Ind < numGridLines; x2Ind++) {
+					
+			Double margProb = 0.0;
+			for (int x1Ind = 0; x1Ind < numGridLines; x1Ind++) {
+				margProb += density[x1Ind][x2Ind];
+			}
+			x2MarginalProb.add(margProb);
+		}
+		
+		// Calculate mutual information
+		for (int x1Ind = 0; x1Ind < numGridLines; x1Ind++) {
+			
+			for (int x2Ind = 0; x2Ind < numGridLines; x2Ind++) {
+				if (density[x1Ind][x2Ind] > 0.0) {
+					double logXYxy = density[x1Ind][x2Ind]/ (x1MarginalProb.get(x1Ind) * x2MarginalProb.get(x2Ind));
+					mutualInfo += density[x1Ind][x2Ind] * Math.log10(logXYxy / Math.pow(Settings.discretization, 2));
+				}
+			}
+		}
+		
+		System.out.println(mutualInfo);
+	} // end displayMutualInformation
 	
 }
 
