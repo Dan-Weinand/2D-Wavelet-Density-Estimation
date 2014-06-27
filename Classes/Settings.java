@@ -56,5 +56,14 @@ public class Settings {
 	public static String waveletDataFolder = "";
 	
 	public static String dataFile = "../WaveletFiles/2dGauss.csv";
+	
+	// Whether or not to calculate and print a cross validation score
+	static boolean postProbOn = false; 
+	
+	// Whether or not to display the CDF instead of the pdf
+	static boolean useCDF = true;
+	
+	// Whether or not to compute the mutual information
+	static boolean useMutual = false;
 
 }

@@ -14,15 +14,6 @@ public class DensityHelper {
 	private static double postProb = 0.0;   // Posterior probability score
 	private static double[][] oldDensity;   // The old density distribution, used for KS statistics
 	
-	// Whether or not to calculate and print a cross validation score
-	private static boolean postProbOn = false; 
-	
-	// Whether or not to display the CDF instead of the pdf
-	private static boolean useCDF = false;
-	
-	// Whether or not to compute the mutual information
-	private static boolean useMutual = false;
-	
 	// The phi values over the density domain gridlines
 	private static ArrayList<ArrayList<Double>> scalePhisHere;
 	private static ArrayList<ArrayList<ArrayList<Double>>> wavePhisHere;
@@ -49,7 +40,7 @@ public class DensityHelper {
 	public static void updateCoefficients(double[] Xnew){
 		
 		// Calculate Posterior probability of data point
-		if (postProbOn && inRange(Xnew[0]) && inRange(Xnew[1]) && (N > Settings.updateFrequency)) {
+		if (Settings.postProbOn && inRange(Xnew[0]) && inRange(Xnew[1]) && (N > Settings.updateFrequency)) {
 			int X1newInd = (int) Math.floor((Xnew[0] - Settings.getMinimumRange())
 					/ Settings.discretization);
 			int X2newInd = (int) Math.floor((Xnew[1] - Settings.getMinimumRange())
@@ -96,7 +87,7 @@ public class DensityHelper {
 					Transform.scalingCoefficients[x1Index][x2Index] *= Settings.agingTheta;
 				}
 			}
-				
+
 		}
 		
 		// Recursively compute coefficients if no aging is used
@@ -563,7 +554,7 @@ public class DensityHelper {
 				}
 				
 				// PDF to CDF conversion
-				if (useCDF) {
+				if (Settings.useCDF) {
 					density[x1Ind][x2Ind] *= Math.pow(Settings.discretization,  2);
 					
 					if (x1Ind == 0) {
@@ -589,12 +580,12 @@ public class DensityHelper {
 		}
 		
 		// Store this density distribution to be used in calculating post probability score
-		if (postProbOn) {
+		if (Settings.postProbOn) {
 			oldDensity = density;
 		}
 		
 		// Calculate and print the mutual information
-		if (useMutual) {
+		if (Settings.useMutual) {
 			displayMutualInformation(density, numGridLines);
 		}
 		
