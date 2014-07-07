@@ -107,6 +107,7 @@ public class EstimatorGUI extends JApplet implements ActionListener {
     	resetButton = new JButton( "Reset" );
     	resetButton.addActionListener( this );
     	resetButton.setPreferredSize( btnSize );
+    	resetButton.setEnabled( false );
     	sampleLabel = new JTextField();
     	sampleLabel.setText( "Sample index " );
     	sampleLabel.setEditable( false );
@@ -160,6 +161,7 @@ public class EstimatorGUI extends JApplet implements ActionListener {
 			startButton.setEnabled( false );
 			settingsButton.setEnabled( false );
 			stopButton.setEnabled( true );
+			resetButton.setEnabled( true );
 			
 			// Initiate the density estimation process.
 			startDensityEstimation();
