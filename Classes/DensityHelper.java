@@ -41,11 +41,15 @@ public class DensityHelper {
 		
 		// Calculate Posterior probability of data point
 		if (Settings.postProbOn && inRange(Xnew[0]) && inRange(Xnew[1]) && (N > Settings.updateFrequency)) {
+			
 			int X1newInd = (int) Math.floor((Xnew[0] - Settings.getMinimumRange())
 					/ Settings.discretization);
 			int X2newInd = (int) Math.floor((Xnew[1] - Settings.getMinimumRange())
 					/ Settings.discretization);
 			double XnewDensity = oldDensity[X1newInd][X2newInd];
+			
+			// Cap the minimum probability at .0001 to avoid negative infinities
+			// from taking the log of 0
 			if (XnewDensity <= .0001) {
 				postProb -= 9.2;
 			}
@@ -419,11 +423,14 @@ public class DensityHelper {
 	 */
 	private static void initializePhiGrid() {
 		
+		// Defines the phis across the grid
 		scalePhisHere = new ArrayList<ArrayList<Double>> ();
+		
 		int numGridLines = getNumGridlines();
 		double scaleNormalizer = Math.pow(2, Settings.startLevel/2.0);
 		double i1 = Settings.getMinimumRange();
 		
+		// Loop across the gridlines
 		for (int x1Ind = 0; x1Ind < numGridLines; x1Ind++)
 			{		
 			
