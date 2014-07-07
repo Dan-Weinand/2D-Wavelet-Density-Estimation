@@ -61,7 +61,7 @@ public class Settings {
 	static boolean postProbOn = false; 
 	
 	// Whether or not to display the CDF instead of the pdf
-	static boolean useCDF = true;
+	static boolean useCDF = false;
 	
 	// Whether or not to compute the mutual information
 	static boolean useMutual = false;
