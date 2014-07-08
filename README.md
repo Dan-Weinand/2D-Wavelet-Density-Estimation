@@ -28,6 +28,15 @@ The resolution to select is arguably the most important parameter. Higher resolu
 
 Many data sets are stationary with respect to their distribution function. It is typically a good idea to consider whether or not it makes sense to look at the data as non-stationary before trying to optimize aging parameters. Assuming the data is non-stationary, an important consideration is how to implement aging. If exponential aging like that proposed by Caudle and Wegman 2009 is used, the optimal value of theta needs to be found. As discussed by García-Treviño and Barria 2012, selecting the optimal theta can be an exceedingly difficult process rather opaque to the end user. In general, increasing theta reduces the model's sensitivity to noise and local changes in the underlying density function while decreasing the parameter has the reverse effect. While a value of theta near .999 has seen some success empirically, it is difficult to understand how much to modify the parameter in order fine tune the estimate's sensitivity to both noise and local changes in the nature of the distribution function. In contrast, using the sliding window approach generally feels much more intuitive. Since the technique simply uses a sliding average of W samples, the user may pick how many samples to average at a time and the trade off between noise insensitivity versus rapid adjustment to changes in the distribution function is fairly straightforward. Based on this, we recommend the sliding window approach unless there is a clear-cut reason for using exponential discounting.
 
+#### Advanced settings
+There are three options which do not have GUI support. They are the calculation and printing of mutual information, a posterior probability score, and the option to display a CDF instead of a PDF. These settings are defaulted to false and they may all be changed by modifying the Settings file.
+
+The mutual information setting will calculate the mutual information given the density distribution and print this value out (in bans) each time the density distribution is updated.
+
+The posterior probability score is given by the sum of the log of the probability of an incoming point given the previously calculated point. It is considered that the minimum probability is .0001 to avoid a negative infinity when a point with probability zero comes. Selecting a resolution level and aging parameter which minimizes this value has empirically been an excellent heuristic.
+
+Selecting the CDF option simply has the plot display the cumulative density function rather than the probability density function.
+
 #### Other considerations
 
 Enabling wavelets at a stopping resolution level of J is exactly equivalent to disabling wavelets at a starting resolution of (J + 1) in terms of the density distribution function. The wavelet type and order to be selected are relatively unimportant in actually finding the density estimate, although a general rule is that higher orders of a given wavelet family will give smoother estimates. If wavelets are to be used, make sure to select a wavelet type which is dyadic in nature (the Daubechies, Symlet or Coiflet wavelets are all dyadic).
