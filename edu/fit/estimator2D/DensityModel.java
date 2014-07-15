@@ -1,3 +1,5 @@
+package edu.fit.estimator2D;
+
 /**
  *  This class represents the density model.
  *  @author Gedeon Nyengele & Daniel Weinand.

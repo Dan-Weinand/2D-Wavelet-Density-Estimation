@@ -1,3 +1,5 @@
+package edu.fit.estimator2D;
+
 /**
  * Encapsulates all the parameter variables used in the density estimator.
  * 
@@ -53,9 +55,9 @@ public class Settings {
 	public static boolean waveletFlag      = false;
 	
 	// Path to the folder containing the look-up table for the wavelets.
-	public static String waveletDataFolder = "";
+	public static String waveletDataFolder = "/edu/fit/estimator2D/resources/waveletfiles/";
 	
-	public static String dataFile = "../WaveletFiles/2dGauss.csv";
+	public static String dataFile = "";
 	
 	// Whether or not to calculate and print a cross validation score
 	static boolean postProbOn = false; 

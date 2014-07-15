@@ -1,3 +1,5 @@
+package edu.fit.estimator2D;
+
 import java.util.ArrayList;
 /**
  * Contains the coefficients and translates of both the scaling and wavelet functions.

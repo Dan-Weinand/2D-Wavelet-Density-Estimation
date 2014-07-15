@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Created-By: ICE LAB
+Name: edu/fit/estimator2D
+Specification-Title: Density Estimator Utility
+Specification-Version: 1.0
+Specification-Vendor: Florida Institute of Technology
+Implementation-Title: 2D-DensityEstimator
+Implementation-Version: 2.0
+Implementation-Vendor: ICE LAB
+Permissions: all-permissions
+Codebase: *.digitsquare.com *.fit.edu
+Application-Name: Density Estimator 1D
+Application-Library-Allowable-Codebase: *.digitsquare.com *.fit.edu
+Trusted-Only: true
+Application-Name: 2D Density Estimator
+
+

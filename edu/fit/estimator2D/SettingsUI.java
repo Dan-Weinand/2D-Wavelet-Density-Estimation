@@ -1,3 +1,5 @@
+package edu.fit.estimator2D;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;

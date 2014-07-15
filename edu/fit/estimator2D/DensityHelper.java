@@ -1,3 +1,5 @@
+package edu.fit.estimator2D;
+
 /**
  * Helper functions for the density estimation algorithm.
  * 

@@ -1,3 +1,5 @@
+package edu.fit.estimator2D;
+
 /**
  * Class to both display the current density estimate,
  * and allow the user to select various parameters.
